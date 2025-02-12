@@ -11,6 +11,14 @@ builder.Services.AddDbContext<TodoContext>(
 );
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowLocalClientOrigin",
+        policy =>
+        {
+            policy.WithOrigins().AllowAnyOrigin();
+        });
+});
 
 var app = builder.Build();
 
@@ -26,13 +34,13 @@ if (app.Environment.IsDevelopment())
 
 //GET:/
 app.MapGet(
-    "/",
+    "/todos",
     async (TodoContext db) => await db.Todos.ToListAsync()
 );
 
 //GET:/id
 app.MapGet(
-    "/{id}",
+    "/todos/{id}",
     async (TodoContext db, int id) =>
         await db.Todos.FindAsync(id) 
             is Todo todo
@@ -42,7 +50,7 @@ app.MapGet(
 
 //POST: /
 app.MapPost(
-    "/",
+    "/todos",
     async (TodoContext db, Todo todo) =>
     {
         await db.Todos.AddAsync(todo);
@@ -53,7 +61,7 @@ app.MapPost(
 
 //PUT: /id
 app.MapPut(
-    "/{id}",
+    "todos/{id}",
     async (TodoContext db, int id, Todo inputTodo) =>
     {
         var todo = await db.Todos.FindAsync(id);
@@ -73,7 +81,7 @@ app.MapPut(
 
 //DELETE: /id
 app.MapDelete(
-    "/{id}",
+    "todos/{id}",
     async (TodoContext db, int id) =>
     {
         if (await db.Todos.FindAsync(id) is Todo todo)
@@ -87,5 +95,7 @@ app.MapDelete(
         return Results.NotFound();
     }
 );
+
+app.UseCors("AllowLocalClientOrigin");
 
 app.Run();
