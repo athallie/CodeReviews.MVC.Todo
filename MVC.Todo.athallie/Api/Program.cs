@@ -16,7 +16,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "AllowLocalClientOrigin",
         policy =>
         {
-            policy.WithOrigins().AllowAnyOrigin();
+            policy.WithOrigins()
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
         });
 });
 
@@ -55,6 +58,7 @@ app.MapPost(
     {
         await db.Todos.AddAsync(todo);
         await db.SaveChangesAsync();
+        Console.WriteLine("Saved");
         return Results.Created($"/{todo.id}", todo);
     }
 );
